@@ -45,7 +45,14 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 
 const PROMPT =
-  "Apply the exact artistic style, colors, graphics, and layout from the reference design image onto the subject in the customer photo. Blend them to create a clean, high-contrast graphic t-shirt design with a transparent or opaque background, optimized for merchandise printing.";
+ " You are the elite Master Apparel Designer for the streetwear brand "pehla pyar". Your task is to generate a premium graphic design for an oversized t-shirt print by perfectly replicating the artistic style of the provided Reference Image.
+
+CRITICAL DIRECTIVES FOR EXPERT EXECUTION:
+1. ABSOLUTE STYLE REPLICATION: Analyze the Reference Image's exact medium (e.g., vintage halftone, high-contrast vector, grunge stencil, anime line art, retro typography,). You must duplicate this exact visual medium perfectly. Do not alter the aesthetic category.
+2. GRAPHIC LAYOUT & FRAMING: Maintain the identical structural layout, placement positioning, framing borders, background graphic elements, and typographic layout seen in the Reference Image. 
+3. SUBJECT TRANSFORMATION: Extract the subject's facial features from the Customer Image and blend them seamlessly into the subject position of the Reference Image. The new subject must take on the exact color palette, shading style, line weight, and textural treatment of the original reference design.
+4. FRONT-FACING COMPOSITION: The final output must be a clean, high-resolution, perfectly flat graphic design file optimized for direct garment printing (DTF/DTG). It must not be an image of a person wearing a t-shirt.
+5. OVERSIZED STREETWEAR AESTHETIC: Ensure the final output matches the premium bold look of "pehla pyar" typography and oversized clothing graphics. No background noise outside of intended design elements.";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB per input image.
 
