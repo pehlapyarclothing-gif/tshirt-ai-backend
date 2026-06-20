@@ -1,51 +1,53 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const cloudinary = require("cloudinary"); // Fixed SDK import matching newer Node structures
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const port = process.env.PORT || 10000;
 
-const PROMPT_INSTRUCTIONS = `Streetwear graphic design layout for the brand "pehla pyar", premium oversized t-shirt print style, highly detailed graphic.`;
+// Correctly map your Render environment link to the Cloudinary engine instance
+if (process.env.CLOUDINARY_URL) {
+  cloudinary.config();
+} else {
+  console.warn("Warning: CLOUDINARY_URL missing in Environment Variables.");
+}
+
+app.use(cors({ origin: process.env.FRONTEND_ORIGIN || true }));
+app.use(express.json({ limit: "1mb" }));
 
 app.post('/api/tshirt-preview', async (req, res) => {
   try {
-    const { customerImageUrl, referenceStyleUrl } = req.body;
+    const { customerImageUrl, referenceStyleUrl } = req.body || {};
 
     if (!customerImageUrl || !referenceStyleUrl) {
-      return res.status(400).json({ success: false, error: 'Missing image parameters' });
+      return res.status(400).json({ success: false, error: "Missing image links." });
     }
 
-    // Using an instantly available open-architecture design generator model 
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({
-          inputs: `${PROMPT_INSTRUCTIONS} Combine features from face source ${customerImageUrl} seamlessly into layout theme ${referenceStyleUrl}`
-        }),
-      }
-    );
+    // Creating a highly customized premium prompt instruction block
+    const basePrompt = `Streetwear graphic design layout for the brand pehla pyar, premium bold oversized t-shirt print style. Clean vector graphic layout matching reference template link ${referenceStyleUrl}, placing customer features from portrait link ${customerImageUrl} seamlessly into the main subject area. High resolution print file, isolated on clean background.`;
+    
+    // Request a clean render instantly from the stable engine structure
+    const encodedPrompt = encodeURIComponent(basePrompt);
+    const generationUrl = `https://image.pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
 
-    if (!response.ok) {
-      throw new Error(`Engine responded with status: ${response.status}`);
-    }
+    // FIXED LINE: Securely upload the free generation image straight into your permanent Cloudinary storage asset folder!
+    const cloudinaryUpload = await cloudinary.v2.uploader.upload(generationUrl, {
+      folder: "shopify_ai_previews",
+      resource_type: "image"
+    });
 
-    const blob = await response.blob();
-    const buffer = Buffer.from(await blob.arrayBuffer());
-    const base64Image = buffer.toString('base64');
-    const aiImageUrl = `data:image/jpeg;base64,${base64Image}`;
-
-    res.json({ success: true, aiImageUrl });
+    return res.json({
+      success: true,
+      aiImageUrl: cloudinaryUpload.secure_url
+    });
 
   } catch (error) {
-    console.error('Generation Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error("Preview setup failed:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Server running smoothly on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`T-shirt preview engine running smoothly on port ${port}`);
 });
