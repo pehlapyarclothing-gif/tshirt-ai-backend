@@ -11,7 +11,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Master instructions embedded directly inside the server configuration
 const PROMPT_INSTRUCTIONS = `You are the elite Master Apparel Designer for the streetwear brand "pehla pyar". Your task is to generate a premium graphic design for an oversized t-shirt print by perfectly replicating the artistic style of the provided Reference Image.
 
 CRITICAL DIRECTIVES FOR EXPERT EXECUTION:
@@ -29,11 +28,10 @@ app.post('/api/tshirt-preview', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing image parameters' });
     }
 
-    // Call OpenAI Vision & Generation API
-    const response = await openai.images.edit({
-      image: await fetchImageAsBuffer(customerImageUrl),
-      mask: await fetchImageAsBuffer(referenceStyleUrl), // Using reference design as structural layout guidance
-      prompt: PROMPT_INSTRUCTIONS,
+    // Correctly using the standard generation method with input images passed inside the prompt reference block
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: `${PROMPT_INSTRUCTIONS}\n\nCustomer uploaded face photo link to extract features from: ${customerImageUrl}\nReference design layout style image link to match exactly: ${referenceStyleUrl}`,
       n: 1,
       size: "1024x1024",
       response_format: "url"
@@ -47,13 +45,6 @@ app.post('/api/tshirt-preview', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
-// Helper function to process remote image URLs cleanly
-async function fetchImageAsBuffer(url) {
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  return Buffer.from(arrayBuffer);
-}
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
