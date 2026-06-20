@@ -28,9 +28,9 @@ app.post('/api/tshirt-preview', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing image parameters' });
     }
 
-    // Fixed configuration by removing the invalid response_format parameter
+    // Switched model to dall-e-2 for immediate account compatibility
     const response = await openai.images.generate({
-      model: "dall-e-3",
+      model: "dall-e-2",
       prompt: `${PROMPT_INSTRUCTIONS}\n\nCustomer uploaded face photo link to extract features from: ${customerImageUrl}\nReference design layout style image link to match exactly: ${referenceStyleUrl}`,
       n: 1,
       size: "1024x1024"
