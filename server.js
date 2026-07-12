@@ -142,7 +142,6 @@ centered composition, no background clutter. Photorealistic t-shirt mockup.`;
     n:               1,
     size:            "1024x1024",
     quality:         "hd",
-    style:           "vivid",
     response_format: "url",
   });
  
