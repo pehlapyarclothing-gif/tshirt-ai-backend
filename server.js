@@ -144,7 +144,7 @@ centered composition, no background clutter. Photorealistic t-shirt mockup.`;
     quality:         "hd",
   });
  
-  const dalleUrl = imageResponse.data?.[0]?.url;
+  const dalleUrl = imageResponse.data?.[0]?.url ?? imageResponse.data?.[0]?.b64_json;
   if (!dalleUrl) throw new Error("DALL-E 3 returned no image URL.");
  
   console.log(`[${requestId}] DALL-E 3 image generated`);
