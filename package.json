@@ -1,15 +1,19 @@
 {
-  "name": "tshirt-ai-backend",
-  "version": "1.0.0",
-  "description": "Real-time AI T-shirt preview bridge",
+  "name": "tshirt-preview-backend",
+  "version": "2.0.0",
+  "description": "AI t-shirt preview — GPT-4 Vision + DALL-E 3 + Cloudinary",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "openai": "^4.52.0"
+    "openai": "^4.47.1"
   }
 }
