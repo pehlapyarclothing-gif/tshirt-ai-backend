@@ -137,7 +137,7 @@ Important: This must look like a real wearable garment graphic — print-ready q
 centered composition, no background clutter. Photorealistic t-shirt mockup.`;
  
   const imageResponse = await openai.images.generate({
-    model:           "dall-e-2",
+    model:           "dall-e-3",
     prompt:          finalPrompt,
     n:               1,
     size:            "1024x1024",
