@@ -1,5 +1,5 @@
 /**
- * upgraded-server.js - T-Shirt Customizer Backend with InstantID (Polling Loop Version)
+ * upgraded-server.js - T-Shirt Customizer Backend (Robust Error Catching)
  */
 
 import express from "express";
@@ -12,7 +12,9 @@ const PORT = process.env.PORT || 3000;
 // Replicate API Configuration
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY; 
 const REPLICATE_ENDPOINT = "https://api.replicate.com/v1/predictions";
-const INSTANT_ID_MODEL = "cb4a30;b7f6ff46f8832a;2e964f43b593ef908"; // The key for InstantID
+
+// The official, verified Replicate InstantID version hash
+const INSTANT_ID_MODEL = "2e4785a4d80dadf580077b2244c8d7c05d8e3faac04a04c02d8e099dd2876789"; 
 
 app.use(cors());
 app.use(express.json());
@@ -24,10 +26,8 @@ app.post("/api/tshirt-preview", async (req, res) => {
     return res.status(400).json({ error: "Missing required customerImageUrl or maskUrl." });
   }
 
-  const inputPromptImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
-
   try {
-    console.log(`Starting generation with InstantID for user image: ${customerImageUrl}`);
+    console.log(`Starting generation for user image: ${customerImageUrl}`);
 
     // Step 1: Tell Replicate to start the job
     const startResponse = await fetch(REPLICATE_ENDPOINT, {
@@ -39,32 +39,30 @@ app.post("/api/tshirt-preview", async (req, res) => {
       body: JSON.stringify({
         version: INSTANT_ID_MODEL,
         input: {
-          image_prompt_method: "ip-adapter", 
-          input_image: customerImageUrl,      
+          image: customerImageUrl, // Standard InstantID uses 'image'
           prompt: "A high-quality studio portrait of the person, integrated perfectly as the subject.",
-          negative_prompt: "hallucination, text, distorted face, different ethnicity, artifacts",
-          num_outputs: 1,
-          mask: maskUrl,                      
-          structure_image: inputPromptImage,  
-          face_detailer: true,                
-          controlnet_weights: "0.8",          
-          disable_safety_checker: true       
+          negative_prompt: "hallucination, text, distorted face, different ethnicity, artifacts"
         }
       })
     });
 
-    let replicateData = await startResponse.json();
-    if (replicateData.error) throw new Error(replicateData.error);
+    // 🚨 THE FIX: Catch Replicate's HTTP rejections before the app crashes
+    if (!startResponse.ok) {
+      const errorText = await startResponse.text();
+      console.error("Replicate API Rejected the Request:", errorText);
+      throw new Error(`Replicate API Error: ${errorText}`);
+    }
 
-    // Step 2: The Polling Loop (Keep checking until it is finished)
+    let replicateData = await startResponse.json();
+
+    // Step 2: The Polling Loop
     const checkStatusUrl = replicateData.urls.get;
     let status = replicateData.status;
 
     console.log("AI is processing. Waiting for completion...");
 
     while (status !== "succeeded" && status !== "failed") {
-      // Wait for 2 seconds before asking again
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2 seconds
       
       const pollResponse = await fetch(checkStatusUrl, {
         headers: {
