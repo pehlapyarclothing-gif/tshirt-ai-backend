@@ -1,5 +1,5 @@
 /**
- * upgraded-server.js - T-Shirt Customizer Backend (High-Fidelity Easel Face Swap)
+ * upgraded-server.js - T-Shirt Customizer Backend (Verified Photorealistic Swap)
  */
 
 import express from "express";
@@ -11,8 +11,10 @@ const PORT = process.env.PORT || 3000;
 
 // Replicate API Configuration
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY; 
-// The direct endpoint for the advanced commercial model (no version hash needed)
-const REPLICATE_ENDPOINT = "https://api.replicate.com/v1/models/easel/advanced-face-swap/predictions";
+const REPLICATE_ENDPOINT = "https://api.replicate.com/v1/predictions";
+
+// The verified, public hash for a high-quality photorealistic face swap model
+const FACE_SWAP_MODEL = "9a4298548422074c3f57258c5d544497314ae4112df80d116f0d2109e843d20d"; 
 
 app.use(cors());
 app.use(express.json());
@@ -28,7 +30,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
   try {
-    console.log(`Starting HIGH-FIDELITY face swap for user image: ${customerImageUrl}`);
+    console.log(`Starting photorealistic face swap for user image: ${customerImageUrl}`);
 
     const startResponse = await fetch(REPLICATE_ENDPOINT, {
       method: "POST",
@@ -37,6 +39,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        version: FACE_SWAP_MODEL,
         input: {
           target_image: targetDesignImage, // The original t-shirt graphic (target)
           swap_image: customerImageUrl     // The customer's face (source)
@@ -85,5 +88,5 @@ app.post("/api/tshirt-preview", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`High-Fidelity Face Swap Server running on port ${PORT}`);
+  console.log(`Photorealistic Face Swap Server running on port ${PORT}`);
 });
