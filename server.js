@@ -1,5 +1,5 @@
 /**
- * upgraded-server.js - T-Shirt Customizer Backend with InstantID (Final ES Module)
+ * upgraded-server.js - T-Shirt Customizer Backend with InstantID (Sync Mode Fix)
  */
 
 import express from "express";
@@ -36,7 +36,8 @@ app.post("/api/tshirt-preview", async (req, res) => {
       method: "POST",
       headers: {
         "Authorization": `Token ${REPLICATE_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Prefer": "wait" // This line forces the server to wait for the final image
       },
       body: JSON.stringify({
         version: INSTANT_ID_MODEL,
