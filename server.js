@@ -1,13 +1,10 @@
 /**
- * upgraded-server.js - T-Shirt Customizer Backend with InstantID (ES Module Version)
+ * upgraded-server.js - T-Shirt Customizer Backend with InstantID (Final ES Module)
  */
 
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
-import dotenv from "dotenv";
-
-dotenv.config(); // Essential to load your API key securely
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,7 +25,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
     return res.status(400).json({ error: "Missing required customerImageUrl or maskUrl." });
   }
 
-  // Use referenceStyleUrl if provided, otherwise default to the provided provided ADYA design
+  // Use referenceStyleUrl if provided, otherwise default to the provided ADYA design
   const inputPromptImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
   try {
