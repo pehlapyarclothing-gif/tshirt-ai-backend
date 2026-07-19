@@ -2,11 +2,9 @@
  * final-server.js - T-Shirt Customizer (Handles both AI Face Swap & Cloudinary text/crop)
  */
 
-const express = require("express");
-const cors = require("cors");
-
-// node-fetch v2 compatibility
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
