@@ -32,9 +32,9 @@ app.post("/api/tshirt-preview", async (req, res) => {
         : customerImageUrl;
     const layerPath = uploadPath.replace(/\//g, ':');
 
-// z_3.5 scales the eyes perfectly to the edges.
-    // y_185 is the exact mathematical center between the hair and the mouth. 
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/w_1080,h_1080,c_fill,g_face,z_3.5,e_grayscale/fl_layer_apply,g_center,y_185/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a`;
+// Generate a timestamp to bypass Cloudinary caching and force a fresh image generation
+    const timestamp = Date.now();
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/w_1080,h_1080,c_fill,g_face,z_2.8,e_grayscale/fl_layer_apply,g_center,y_130/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a?t=${timestamp}`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
