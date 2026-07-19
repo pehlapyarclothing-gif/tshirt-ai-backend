@@ -26,18 +26,23 @@ app.post("/api/tshirt-preview", async (req, res) => {
 
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
-  // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
+// --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
   if (targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c_1_nytg4a")) {
     console.log("Processing ONLY YOU design via Cloudinary...");
     
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
+    
+    // Extract the specific image path to bypass Cloudinary's strict "fetch" block
+    const uploadPath = customerImageUrl.includes("/upload/") 
+        ? customerImageUrl.split("/upload/")[1] 
+        : customerImageUrl;
 
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/fetch/w_1080,h_1080,c_fill,g_face,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/g_south_east,x_120,y_220/fl_layer_apply/${customerImageUrl}`;
+    // Use the native /upload/ URL structure instead of /fetch/
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/g_south_east,x_120,y_220/fl_layer_apply/${uploadPath}`;
 
     console.log(`Instant Generation Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
   }
-
 
   // --- ROUTE 2: STANDARD AI FACE SWAP ---
   try {
