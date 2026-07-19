@@ -26,16 +26,35 @@ app.post("/api/tshirt-preview", async (req, res) => {
 
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
-// --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
+// --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN (Structured Page Layout with White Space & Precision Crop) ---
   if (targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c_1_nytg4a")) {
-    console.log("Processing ONLY YOU design via Cloudinary...");
+    console.log("Processing ONLY YOU structured layout via Cloudinary...");
     
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
     
-    // Extract the specific image path to bypass Cloudinary's strict "fetch" block
+    // Extract the specific image path
     const uploadPath = customerImageUrl.includes("/upload/") 
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
+
+    // Use a high-resolution, pure white background as our structured canvas base
+    const squareWhiteCanvas = "image/upload/v1/projects/white_square_2160.png";
+
+    // 1. Precise Coordinate Crop of the Eye-Band (c_fill,x_540,y_350,w_2160,h_600)
+    // 2. High Resolution (w_2160)
+    // 3. Perfect Grayscale
+    const tightEyeBandCrop = `image/upload/w_2160,h_2160,c_limit,e_grayscale/c_fill,x_540,y_350,w_2160,h_600/${uploadPath}`;
+
+    // COMPOSITE: Build the final structured layout on the white canvas
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_2160,h_2160,c_limit` +
+      `/${squareWhiteCanvas}` +
+      `/l_${tightEyeBandCrop}/c_limit,g_north,y_150/fl_layer_apply` + 
+      `/l_text:Arial_65_bold:${safeName},co_black/g_south_east,x_50,y_50/fl_layer_apply` + 
+      `/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_2160,h_2160,c_scale/fl_layer_apply`;
+
+    console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
+    return res.json({ aiImageUrl: cloudinaryCompositeUrl });
+  }
 
     // Use the native /upload/ URL structure instead of /fetch/
    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_1.8,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_120,y_220/${uploadPath}`;
