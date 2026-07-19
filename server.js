@@ -27,12 +27,16 @@ app.post("/api/tshirt-preview", async (req, res) => {
     
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
     
+   // 1. Format the image path with colons so Cloudinary can safely use it as a layer
     const uploadPath = customerImageUrl.includes("/upload/") 
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
+    const layerPath = uploadPath.replace(/\//g, ':');
 
-    // Fixed Syntax: fl_layer_apply is tied directly to the coordinates using commas
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_2.5,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/${uploadPath}`;
+    // 2. Base image = Template. 
+    //    Underlay (u_) = User Face (Zoomed 2.5x and pushed DOWN by 150px to center the eyes)
+    //    Layer (l_) = Custom Text (Aligned to the corner)
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/w_1080,h_1080,c_fill,g_face,z_2.5,e_grayscale/fl_layer_apply,g_center,y_150/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
