@@ -27,16 +27,16 @@ app.post("/api/tshirt-preview", async (req, res) => {
     
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
     
-   // 1. Format the image path with colons so Cloudinary can safely use it as a layer
     const uploadPath = customerImageUrl.includes("/upload/") 
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
     const layerPath = uploadPath.replace(/\//g, ':');
 
-    // 2. Base image = Template. 
-    //    Underlay (u_) = User Face (Zoomed 2.5x and pushed DOWN by 150px to center the eyes)
-    //    Layer (l_) = Custom Text (Aligned to the corner)
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/w_1080,h_1080,c_fill,g_face,z_2.5,e_grayscale/fl_layer_apply,g_center,y_150/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a`;
+    // **BULLETPROOF PRECISION CROP AND ALIGNMENT:**
+    // 1. Prepare full face (grayscale, c_limit).
+    // 2. Position (g_center,y_150) and then FORCE a specific 1080x250px crop (w_1080,h_250,c_crop)
+    //    which cuts off the rest of the face.
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/c_limit,e_grayscale/fl_layer_apply,g_center,y_150,w_1080,h_250,c_crop/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
