@@ -10,7 +10,8 @@ const REPLICATE_ENDPOINT = "https://api.replicate.com/v1/predictions";
 const FACE_SWAP_MODEL = "9a4298548422074c3f57258c5d544497314ae4112df80d116f0d2109e843d20d"; 
 
 app.use(cors());
-app.use(express.json());
+// Increased limit just in case your frontend passes large Base64 image files
+app.use(express.json({ limit: '50mb' })); 
 
 app.post("/api/tshirt-preview", async (req, res) => {
   const { customerImageUrl, referenceStyleUrl, customerName } = req.body; 
@@ -22,22 +23,22 @@ app.post("/api/tshirt-preview", async (req, res) => {
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
   // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
-  // THE BUG FIX: Catching both the Shopify default image and the transparent template!
   if (targetDesignImage.includes("1000113069_l18mfk") || targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c")) {
     console.log("Processing ONLY YOU structured layout via Cloudinary...");
     
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
+    const timestamp = Date.now();
     
     const uploadPath = customerImageUrl.includes("/upload/") 
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
     const layerPath = uploadPath.replace(/\//g, ':');
-        
-    const timestamp = Date.now();
 
-// The customer has already cropped the image perfectly.
-    // All we do is drop their pre-cut slice exactly in the center behind the template.
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/fl_layer_apply,g_center/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a`;
+    // THE SHORTCUT: 
+    // We removed all the g_face, zoom, and coordinate math. 
+    // Cloudinary simply takes the template, overlays (l_) your pre-cut image in the exact center, and adds the text.
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/l_${layerPath}/fl_layer_apply,g_center/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a?t=${timestamp}`;
+
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
   }
