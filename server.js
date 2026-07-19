@@ -34,10 +34,10 @@ app.post("/api/tshirt-preview", async (req, res) => {
         : customerImageUrl;
     const layerPath = uploadPath.replace(/\//g, ':');
 
-    // THE SHORTCUT: 
-    // We removed all the g_face, zoom, and coordinate math. 
-    // Cloudinary simply takes the template, overlays (l_) your pre-cut image in the exact center, and adds the text.
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/l_${layerPath}/fl_layer_apply,g_center/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a?t=${timestamp}`;
+  // 1. u_${layerPath} puts the image BEHIND the template.
+    // 2. e_grayscale turns the eyes black and white.
+    // 3. x_250, y_220 pulls the custom name further inward so it doesn't cut off.
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath},e_grayscale/fl_layer_apply,g_center/l_text:Arial_60_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_250,y_220/file_00000000cc487206952731e65f4f1c9c_1_nytg4a?t=${timestamp}`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
