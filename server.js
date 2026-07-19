@@ -2,9 +2,11 @@
  * final-server.js - T-Shirt Customizer (Handles both AI Face Swap & Cloudinary text/crop)
  */
 
-import express from "express";
-import cors from "cors";
-import fetch from "node-fetch";
+const express = require("express");
+const cors = require("cors");
+
+// node-fetch v2 compatibility
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,17 +29,11 @@ app.post("/api/tshirt-preview", async (req, res) => {
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
   // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
-  // If the frontend sends your new transparent ONLY YOU template, use Cloudinary directly
   if (targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c_1_nytg4a")) {
     console.log("Processing ONLY YOU design via Cloudinary...");
     
-    // Ensure we have a name, default to "YOU" if blank, and make it uppercase
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
 
-    // This Cloudinary URL does all the magic instantly:
-    // 1. Fetches the customer image & crops to face (B&W)
-    // 2. Overlays your transparent template
-    // 3. Stamps the customer's name in bold Arial font in the bottom right corner
     const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/fetch/w_1080,h_1080,c_fill,g_face,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/g_south_east,x_120,y_220/fl_layer_apply/${customerImageUrl}`;
 
     console.log(`Instant Generation Complete: ${cloudinaryCompositeUrl}`);
@@ -45,7 +41,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
   }
 
 
-  // --- ROUTE 2: STANDARD AI FACE SWAP (For VEER, ADYA, etc.) ---
+  // --- ROUTE 2: STANDARD AI FACE SWAP ---
   try {
     console.log(`Starting AI face swap for user image: ${customerImageUrl}`);
 
