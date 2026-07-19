@@ -21,7 +21,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
 
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
-  // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
+// --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
   if (targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c_1_nytg4a")) {
     console.log("Processing ONLY YOU structured layout via Cloudinary...");
     
@@ -30,16 +30,17 @@ app.post("/api/tshirt-preview", async (req, res) => {
     const uploadPath = customerImageUrl.includes("/upload/") 
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
-    const layerPath = uploadPath.replace(/\//g, ':');
-
-// Generate a timestamp to bypass Cloudinary caching and force a fresh image generation
+        
     const timestamp = Date.now();
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/u_${layerPath}/w_1080,h_1080,c_fill,g_face,z_2.8,e_grayscale/fl_layer_apply,g_center,y_130/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/file_00000000cc487206952731e65f4f1c9c_1_nytg4a?t=${timestamp}`;
+
+    // Make the user photo the base image. 
+    // y_120 moves the "center of gravity" down to the nose/mouth, pushing the eyes UP into the top half of the square.
+    // We then layer the template and text exactly on top.
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_2.2,e_grayscale,y_120/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/${uploadPath}?t=${timestamp}`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
   }
-
   // --- ROUTE 2: STANDARD AI FACE SWAP ---
   try {
     console.log(`Starting AI face swap for user image: ${customerImageUrl}`);
