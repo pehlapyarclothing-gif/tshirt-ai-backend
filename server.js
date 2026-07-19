@@ -21,7 +21,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
 
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
-  // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN (Structured Page Layout) ---
+  // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN ---
   if (targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c_1_nytg4a")) {
     console.log("Processing ONLY YOU structured layout via Cloudinary...");
     
@@ -31,8 +31,8 @@ app.post("/api/tshirt-preview", async (req, res) => {
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
 
- // Restores the high-quality 1080x1080 base, zooms the face 2.5x for the eyes, and aligns text to y_155
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_2.5,q_100,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_70_bold:${safeName},co_black/g_south_east,x_100,y_155/fl_layer_apply/${uploadPath}`;
+    // Fixed Syntax: fl_layer_apply is tied directly to the coordinates using commas
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_2.5,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_70_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_155/${uploadPath}`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
