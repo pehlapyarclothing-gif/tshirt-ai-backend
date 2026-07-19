@@ -1,7 +1,3 @@
-/**
- * final-server.js - T-Shirt Customizer (Handles both AI Face Swap & Cloudinary text/crop)
- */
-
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
@@ -9,7 +5,6 @@ import fetch from "node-fetch";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Replicate API Configuration for standard face swaps
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY; 
 const REPLICATE_ENDPOINT = "https://api.replicate.com/v1/predictions";
 const FACE_SWAP_MODEL = "9a4298548422074c3f57258c5d544497314ae4112df80d116f0d2109e843d20d"; 
@@ -26,26 +21,20 @@ app.post("/api/tshirt-preview", async (req, res) => {
 
   const targetDesignImage = referenceStyleUrl || "https://res.cloudinary.com/dugxzgkvy/image/upload/v1783858281/1000113069_l18mfk.png";
 
-// --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN (Structured Page Layout with White Space & Precision Crop) ---
+  // --- ROUTE 1: THE "ONLY YOU" DYNAMIC DESIGN (Structured Page Layout) ---
   if (targetDesignImage.includes("file_00000000cc487206952731e65f4f1c9c_1_nytg4a")) {
     console.log("Processing ONLY YOU structured layout via Cloudinary...");
     
     const safeName = encodeURIComponent((customerName || "YOU").toUpperCase().trim());
     
-    // Extract the specific image path
     const uploadPath = customerImageUrl.includes("/upload/") 
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
 
-    // Use a high-resolution, pure white background as our structured canvas base
     const squareWhiteCanvas = "image/upload/v1/projects/white_square_2160.png";
 
-    // 1. Precise Coordinate Crop of the Eye-Band (c_fill,x_540,y_350,w_2160,h_600)
-    // 2. High Resolution (w_2160)
-    // 3. Perfect Grayscale
     const tightEyeBandCrop = `image/upload/w_2160,h_2160,c_limit,e_grayscale/c_fill,x_540,y_350,w_2160,h_600/${uploadPath}`;
 
-    // COMPOSITE: Build the final structured layout on the white canvas
     const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_2160,h_2160,c_limit` +
       `/${squareWhiteCanvas}` +
       `/l_${tightEyeBandCrop}/c_limit,g_north,y_150/fl_layer_apply` + 
@@ -53,13 +42,6 @@ app.post("/api/tshirt-preview", async (req, res) => {
       `/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_2160,h_2160,c_scale/fl_layer_apply`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
-    return res.json({ aiImageUrl: cloudinaryCompositeUrl });
-  }
-
-    // Use the native /upload/ URL structure instead of /fetch/
-   const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_1.8,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_120,y_220/${uploadPath}`;
-
-    console.log(`Instant Generation Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
   }
 
