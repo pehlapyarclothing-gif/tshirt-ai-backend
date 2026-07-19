@@ -31,15 +31,8 @@ app.post("/api/tshirt-preview", async (req, res) => {
         ? customerImageUrl.split("/upload/")[1] 
         : customerImageUrl;
 
-    const squareWhiteCanvas = "image/upload/v1/projects/white_square_2160.png";
-
-    const tightEyeBandCrop = `image/upload/w_2160,h_2160,c_limit,e_grayscale/c_fill,x_540,y_350,w_2160,h_600/${uploadPath}`;
-
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_2160,h_2160,c_limit` +
-      `/${squareWhiteCanvas}` +
-      `/l_${tightEyeBandCrop}/c_limit,g_north,y_150/fl_layer_apply` + 
-      `/l_text:Arial_65_bold:${safeName},co_black/g_south_east,x_50,y_50/fl_layer_apply` + 
-      `/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_2160,h_2160,c_scale/fl_layer_apply`;
+  // Use native padding (c_pad,b_white) to create the white square and align the text
+    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_450,c_fill,g_face,z_1.8,e_grayscale/w_1080,h_1080,c_pad,b_white,g_north,y_250/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_75_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_100,y_135/${uploadPath}`;
 
     console.log(`Structured Page Layout Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
