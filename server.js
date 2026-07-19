@@ -38,7 +38,7 @@ app.post("/api/tshirt-preview", async (req, res) => {
         : customerImageUrl;
 
     // Use the native /upload/ URL structure instead of /fetch/
-    const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/g_south_east,x_120,y_220/fl_layer_apply/${uploadPath}`;
+   const cloudinaryCompositeUrl = `https://res.cloudinary.com/dugxzgkvy/image/upload/w_1080,h_1080,c_fill,g_face,z_1.8,e_grayscale/l_file_00000000cc487206952731e65f4f1c9c_1_nytg4a/w_1080,h_1080,c_scale/fl_layer_apply/l_text:Arial_65_bold:${safeName},co_black/fl_layer_apply,g_south_east,x_120,y_220/${uploadPath}`;
 
     console.log(`Instant Generation Complete: ${cloudinaryCompositeUrl}`);
     return res.json({ aiImageUrl: cloudinaryCompositeUrl });
